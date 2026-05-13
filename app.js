@@ -1,4 +1,3 @@
-// Fixes #1: cierre de issue relacionada con `app.js`
 const unidades = ["kg", "unidad", "cajon", "atado"];
 
 const estadoInicial = {
