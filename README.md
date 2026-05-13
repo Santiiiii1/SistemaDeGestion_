@@ -18,4 +18,6 @@ Para usar el sistema desde consola:
 node app.js
 ```
 
-Para usar la interfaz web, abrir `index.html` en el navegador.
+Para usar la interfaz web, abrir `index.html` en el navegador
+o
+https://santiiiii1.github.io/SistemaDeGestion_/
