@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion de Frutas y Verduras</title>
+  <style>
+    :root {
+      --bg: #f6f4ee;
+      --panel: #ffffff;
+      --ink: #24302d;
+      --muted: #66736e;
+      --line: #dfe5df;
+      --green: #287a52;
+      --green-dark: #1c5e3e;
+      --red: #d75545;
+      --blue: #3c6f9f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header {
+      padding: 28px clamp(16px, 4vw, 48px) 18px;
+      background: #183d31;
+      color: #fff;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #d7eadf;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    main { padding: 24px clamp(16px, 4vw, 48px) 40px; }
+
+    footer {
+      padding: 0 clamp(16px, 4vw, 48px) 28px;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    nav, .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 24px rgba(36, 48, 45, 0.08);
+    }
+
+    nav {
+      padding: 12px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .tab {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink);
+      padding: 12px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .tab:hover, .tab.active {
+      background: #e8f2ec;
+      color: var(--green-dark);
+    }
+
+    .panel {
+      padding: 20px;
+      min-height: 560px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 11px 12px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    button.primary {
+      border: 0;
+      border-radius: 6px;
+      background: var(--green);
+      color: #fff;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      align-self: end;
+    }
+
+    button.primary:hover { background: var(--green-dark); }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f1f5f2;
+      color: #4d5c57;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e7edf8;
+      color: var(--blue);
+    }
+
+    .badge.warn {
+      background: #fff3d0;
+      color: #8a5a00;
+    }
+
+    .badge.bad {
+      background: #fde4df;
+      color: #9d2d20;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 26px;
+    }
+
+    .message {
+      min-height: 22px;
+      margin: 0 0 14px;
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .message.error { color: var(--red); }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      nav {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid, .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sistema de Gestion de Frutas y Verduras</h1>
+    <p>Ventas, compras, stock, productos, reportes y control de estado con precios expresados por 1 kg.</p>
+  </header>
+
+  <main>
+    <div class="layout">
+      <nav aria-label="Menu principal">
+        <button class="tab active" data-view="ventas">Ventas</button>
+        <button class="tab" data-view="compras">Compras</button>
+        <button class="tab" data-view="stock">Stock</button>
+        <button class="tab" data-view="productos">Productos</button>
+        <button class="tab" data-view="reportes">Reportes</button>
+        <button class="tab" data-view="estado">Estado</button>
+      </nav>
+
+      <section class="panel">
+        <p id="mensaje" class="message"></p>
+        <div id="vista"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 - Proyecto escolar</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    const sistema = crearSistema();
+    let vistaActual = "ventas";
+    const vista = document.getElementById("vista");
+    const mensaje = document.getElementById("mensaje");
+
+    function productosOptions() {
+      return sistema.listarProductos().map((producto) => (
+        `<option value="${producto.id}">${producto.nombre} (${producto.stock} ${producto.unidad})</option>`
+      )).join("");
+    }
+
+    function mostrarMensaje(texto, esError = false) {
+      mensaje.textContent = texto;
+      mensaje.classList.toggle("error", esError);
+    }
+
+    function tablaStock() {
+      const filas = sistema.reporteStock().map((producto) => {
+        const estadoClase = producto.estado === "no apto" ? "bad" : producto.estado === "maduro" ? "warn" : "";
+        return `<tr>
+          <td>${producto.id}</td>
+          <td>${producto.nombre}</td>
+          <td>${producto.categoria}</td>
+          <td>${producto.stock} ${producto.unidad}</td>
+          <td>${formatoMoneda(producto.precioVenta)}</td>
+          <td><span class="badge ${estadoClase}">${producto.estado}</span></td>
+          <td>${producto.bajoStock ? '<span class="badge warn">Reponer</span>' : '<span class="badge">OK</span>'}</td>
+        </tr>`;
+      }).join("");
+
+      return `<div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Precio x 1 kg</th><th>Estado</th><th>Alerta</th></tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>
+      </div>`;
+    }
+
+    function tablaMovimientos(items, tipo) {
+      if (!items.length) return `<p>No hay ${tipo} registradas todavia.</p>`;
+      return `<div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Fecha</th><th>${tipo === "compras" ? "Proveedor" : "Producto"}</th><th>Producto</th><th>Cantidad</th><th>Precio x 1 kg</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            ${items.map((item) => `<tr>
+              <td>${item.id}</td>
+              <td>${item.fecha}</td>
+              <td>${tipo === "compras" ? item.proveedor : item.producto}</td>
+              <td>${item.producto}</td>
+              <td>${item.cantidad} ${item.unidad}</td>
+              <td>${formatoMoneda(item.precioUnitario)}</td>
+              <td>${formatoMoneda(item.total)}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    function renderVentas() {
+      vista.innerHTML = `<div class="toolbar"><h2>Registrar venta</h2></div>
+        <form id="formVenta" class="grid">
+          <label>Producto
+            <select name="productoId">${productosOptions()}</select>
+          </label>
+          <label>Cantidad (kg)
+            <input name="cantidad" type="number" min="0.1" step="0.1" required>
+          </label>
+          <button class="primary" type="submit">Registrar venta</button>
+        </form>
+        ${tablaMovimientos(sistema.reporteVentas().items, "ventas")}`;
+
+      document.getElementById("formVenta").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const datos = new FormData(event.currentTarget);
+        try {
+          const venta = sistema.registrarVenta(datos.get("productoId"), datos.get("cantidad"));
+          mostrarMensaje(`Venta registrada: ${venta.producto} por ${formatoMoneda(venta.total)}.`);
+          renderVentas();
+        } catch (error) {
+          mostrarMensaje(error.message, true);
+        }
+      });
+    }
+
+    function renderCompras() {
+      vista.innerHTML = `<div class="toolbar"><h2>Registrar compra</h2></div>
+        <form id="formCompra" class="grid">
+          <label>Proveedor <input name="proveedor" required></label>
+          <label>Producto <select name="productoId">${productosOptions()}</select></label>
+          <label>Cantidad (kg) <input name="cantidad" type="number" min="0.1" step="0.1" required></label>
+          <label>Precio de compra x 1 kg <input name="precio" type="number" min="0" step="0.01" required></label>
+          <button class="primary" type="submit">Registrar compra</button>
+        </form>
+        ${tablaMovimientos(sistema.reporteCompras().items, "compras")}`;
+
+      document.getElementById("formCompra").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const datos = new FormData(event.currentTarget);
+        try {
+          const compra = sistema.registrarCompra(datos.get("proveedor"), datos.get("productoId"), datos.get("cantidad"), datos.get("precio"));
+          mostrarMensaje(`Compra registrada: ${compra.producto} por ${formatoMoneda(compra.total)}.`);
+          renderCompras();
+        } catch (error) {
+          mostrarMensaje(error.message, true);
+        }
+      });
+    }
+
+    function renderStock() {
+      vista.innerHTML = `<div class="toolbar"><h2>Stock disponible</h2></div>${tablaStock()}`;
+    }
+
+    function renderProductos() {
+      vista.innerHTML = `<div class="toolbar"><h2>Gestionar productos</h2></div>
+        <form id="formProducto" class="grid">
+          <label>Nombre <input name="nombre" required></label>
+          <label>Categoria <input name="categoria" required></label>
+          <label>Unidad
+            <select name="unidad">
+              <option value="kg">kg</option>
+              <option value="unidad">unidad</option>
+              <option value="cajon">cajon</option>
+              <option value="atado">atado</option>
+            </select>
+          </label>
+          <label>Precio de venta x 1 kg <input name="precioVenta" type="number" min="0" step="0.01" required></label>
+          <label>Stock inicial (kg) <input name="stock" type="number" min="0" step="0.1" required></label>
+          <label>Stock minimo (kg) <input name="stockMinimo" type="number" min="0" step="0.1" required></label>
+          <button class="primary" type="submit">Crear producto</button>
+        </form>
+        ${tablaStock()}`;
+
+      document.getElementById("formProducto").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const datos = Object.fromEntries(new FormData(event.currentTarget));
+        sistema.crearProducto(datos);
+        mostrarMensaje("Producto creado correctamente.");
+        renderProductos();
+      });
+    }
+
+    function renderReportes() {
+      const ventas = sistema.reporteVentas();
+      const compras = sistema.reporteCompras();
+      const stock = sistema.reporteStock();
+      const bajoStock = stock.filter((producto) => producto.bajoStock).length;
+      vista.innerHTML = `<div class="toolbar"><h2>Reportes</h2></div>
+        <div class="cards">
+          <div class="metric"><span>Total vendido</span><strong>${formatoMoneda(ventas.total)}</strong></div>
+          <div class="metric"><span>Total comprado</span><strong>${formatoMoneda(compras.total)}</strong></div>
+          <div class="metric"><span>Productos a reponer</span><strong>${bajoStock}</strong></div>
+        </div>
+        <h2>Ventas</h2>
+        ${tablaMovimientos(ventas.items, "ventas")}
+        <br>
+        <h2>Compras</h2>
+        ${tablaMovimientos(compras.items, "compras")}
+        <br>
+        <h2>Inventario</h2>
+        ${tablaStock()}`;
+    }
+
+    function renderEstado() {
+      vista.innerHTML = `<div class="toolbar"><h2>Control de estado</h2></div>
+        <form id="formEstado" class="grid">
+          <label>Producto <select name="productoId">${productosOptions()}</select></label>
+          <label>Estado
+            <select name="estado">
+              <option value="fresco">fresco</option>
+              <option value="maduro">maduro</option>
+              <option value="no apto">no apto</option>
+            </select>
+          </label>
+          <button class="primary" type="submit">Actualizar estado</button>
+        </form>
+        ${tablaStock()}`;
+
+      document.getElementById("formEstado").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const datos = new FormData(event.currentTarget);
+        const producto = sistema.actualizarEstado(datos.get("productoId"), datos.get("estado"));
+        mostrarMensaje(`Estado actualizado: ${producto.nombre} ahora esta ${producto.estado}.`);
+        renderEstado();
+      });
+    }
+
+    function render() {
+      const vistas = {
+        ventas: renderVentas,
+        compras: renderCompras,
+        stock: renderStock,
+        productos: renderProductos,
+        reportes: renderReportes,
+        estado: renderEstado
+      };
+      vistas[vistaActual]();
+    }
+
+    document.querySelectorAll(".tab").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+        boton.classList.add("active");
+        vistaActual = boton.dataset.view;
+        mostrarMensaje("");
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>
