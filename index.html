@@ -243,22 +243,34 @@
       .grid, .cards { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
-    <h1>Sistema de Gestion de Frutas y Verduras</h1>
-    <p>Ventas, compras, stock, productos, reportes y control de estado con precios expresados por 1 kg.</p>
+    <div class="header-content">
+      <div>
+        <span class="eyebrow">Mercado fresco</span>
+        <h1>Sistema de Gestion de Frutas y Verduras</h1>
+        <p>Ventas, compras, stock, productos, reportes y control de estado con precios expresados por 1 kg.</p>
+      </div>
+      <div class="header-card">
+        <span>Operacion activa</span>
+        <strong>Inventario diario</strong>
+      </div>
+    </div>
   </header>
 
   <main>
+    <section id="resumenRapido" class="quick-stats" aria-label="Resumen rapido"></section>
+
     <div class="layout">
       <nav aria-label="Menu principal">
-        <button class="tab active" data-view="ventas">Ventas</button>
-        <button class="tab" data-view="compras">Compras</button>
-        <button class="tab" data-view="stock">Stock</button>
-        <button class="tab" data-view="productos">Productos</button>
-        <button class="tab" data-view="reportes">Reportes</button>
-        <button class="tab" data-view="estado">Estado</button>
+        <button class="tab active" data-view="ventas"><span>01</span> Ventas</button>
+        <button class="tab" data-view="compras"><span>02</span> Compras</button>
+        <button class="tab" data-view="stock"><span>03</span> Stock</button>
+        <button class="tab" data-view="productos"><span>04</span> Productos</button>
+        <button class="tab" data-view="reportes"><span>05</span> Reportes</button>
+        <button class="tab" data-view="estado"><span>06</span> Estado</button>
       </nav>
 
       <section class="panel">
@@ -278,6 +290,7 @@
     let vistaActual = "ventas";
     const vista = document.getElementById("vista");
     const mensaje = document.getElementById("mensaje");
+    const resumenRapido = document.getElementById("resumenRapido");
 
     function productosOptions() {
       return sistema.listarProductos().map((producto) => (
@@ -288,6 +301,33 @@
     function mostrarMensaje(texto, esError = false) {
       mensaje.textContent = texto;
       mensaje.classList.toggle("error", esError);
+    }
+
+    function actualizarResumen() {
+      const ventas = sistema.reporteVentas();
+      const compras = sistema.reporteCompras();
+      const stock = sistema.reporteStock();
+      const kilosDisponibles = stock.reduce((suma, producto) => suma + Number(producto.stock), 0);
+      const bajoStock = stock.filter((producto) => producto.bajoStock).length;
+
+      resumenRapido.innerHTML = `
+        <article>
+          <span>Productos</span>
+          <strong>${stock.length}</strong>
+        </article>
+        <article>
+          <span>Kilos disponibles</span>
+          <strong>${kilosDisponibles.toFixed(1)}</strong>
+        </article>
+        <article>
+          <span>Total vendido</span>
+          <strong>${formatoMoneda(ventas.total)}</strong>
+        </article>
+        <article>
+          <span>Alertas de stock</span>
+          <strong>${bajoStock}</strong>
+        </article>
+      `;
     }
 
     function tablaStock() {
@@ -355,7 +395,7 @@
         try {
           const venta = sistema.registrarVenta(datos.get("productoId"), datos.get("cantidad"));
           mostrarMensaje(`Venta registrada: ${venta.producto} por ${formatoMoneda(venta.total)}.`);
-          renderVentas();
+          render();
         } catch (error) {
           mostrarMensaje(error.message, true);
         }
@@ -379,7 +419,7 @@
         try {
           const compra = sistema.registrarCompra(datos.get("proveedor"), datos.get("productoId"), datos.get("cantidad"), datos.get("precio"));
           mostrarMensaje(`Compra registrada: ${compra.producto} por ${formatoMoneda(compra.total)}.`);
-          renderCompras();
+          render();
         } catch (error) {
           mostrarMensaje(error.message, true);
         }
@@ -415,7 +455,7 @@
         const datos = Object.fromEntries(new FormData(event.currentTarget));
         sistema.crearProducto(datos);
         mostrarMensaje("Producto creado correctamente.");
-        renderProductos();
+        render();
       });
     }
 
@@ -460,7 +500,7 @@
         const datos = new FormData(event.currentTarget);
         const producto = sistema.actualizarEstado(datos.get("productoId"), datos.get("estado"));
         mostrarMensaje(`Estado actualizado: ${producto.nombre} ahora esta ${producto.estado}.`);
-        renderEstado();
+        render();
       });
     }
 
@@ -473,6 +513,7 @@
         reportes: renderReportes,
         estado: renderEstado
       };
+      actualizarResumen();
       vistas[vistaActual]();
     }
 
