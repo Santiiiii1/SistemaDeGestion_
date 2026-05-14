@@ -19,3 +19,15 @@ node app.js
 ```
 
 Para usar la interfaz web, abrir `index.html` en el navegador.
+
+## Lista de frutas y verduras incluidas
+
+- Papa
+- Cebolla
+- Tomate
+- Zapallo
+- Zanahoria
+- Manzana
+- Naranja
+- Banana
+- Piña
