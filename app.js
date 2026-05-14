@@ -5,11 +5,17 @@ const estadoInicial = {
     { id: 1, nombre: "Manzana roja", categoria: "Fruta", unidad: "kg", precioVenta: 1000, stock: 35, stockMinimo: 8, estado: "fresco" },
     { id: 2, nombre: "Banana", categoria: "Fruta", unidad: "kg", precioVenta: 800, stock: 22, stockMinimo: 6, estado: "maduro" },
     { id: 3, nombre: "Lechuga", categoria: "Verdura", unidad: "kg", precioVenta: 700, stock: 14, stockMinimo: 5, estado: "fresco" },
-    { id: 4, nombre: "Tomate", categoria: "Verdura", unidad: "kg", precioVenta: 900, stock: 18, stockMinimo: 7, estado: "fresco" }
+    { id: 4, nombre: "Tomate", categoria: "Verdura", unidad: "kg", precioVenta: 900, stock: 18, stockMinimo: 7, estado: "fresco" },
+    { id: 5, nombre: "Papa", categoria: "Verdura", unidad: "kg", precioVenta: 600, stock: 40, stockMinimo: 10, estado: "fresco" },
+    { id: 6, nombre: "Cebolla", categoria: "Verdura", unidad: "kg", precioVenta: 550, stock: 30, stockMinimo: 8, estado: "fresco" },
+    { id: 7, nombre: "Zapallo", categoria: "Verdura", unidad: "kg", precioVenta: 650, stock: 20, stockMinimo: 5, estado: "fresco" },
+    { id: 8, nombre: "Zanahoria", categoria: "Verdura", unidad: "kg", precioVenta: 620, stock: 28, stockMinimo: 6, estado: "fresco" },
+    { id: 9, nombre: "Naranja", categoria: "Fruta", unidad: "kg", precioVenta: 750, stock: 18, stockMinimo: 7, estado: "maduro" },
+    { id: 10, nombre: "Piña", categoria: "Fruta", unidad: "unidad", precioVenta: 1200, stock: 14, stockMinimo: 4, estado: "fresco" }
   ],
   ventas: [],
   compras: [],
-  siguienteProductoId: 5,
+  siguienteProductoId: 11,
   siguienteVentaId: 1,
   siguienteCompraId: 1
 };
@@ -409,3 +415,4 @@ if (typeof window !== "undefined") {
   window.crearSistema = crearSistema;
   window.formatoMoneda = formatoMoneda;
 }
+
