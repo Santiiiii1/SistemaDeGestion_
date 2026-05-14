@@ -22,14 +22,3 @@ Para usar la interfaz web, abrir `index.html` en el navegador
 o
 https://santiiiii1.github.io/SistemaDeGestion_/
 
-## Lista de frutas y verduras incluidas
-
-- Papa
-- Cebolla
-- Tomate
-- Zapallo
-- Zanahoria
-- Manzana
-- Naranja
-- Banana
-- Piña
