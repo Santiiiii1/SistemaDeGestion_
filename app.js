@@ -157,11 +157,179 @@ function formatoMoneda(valor) {
   return Number(valor).toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
+const coloresConsola = {
+  reset: "\x1b[0m",
+  verde: "\x1b[32m",
+  amarillo: "\x1b[33m",
+  azul: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  rojo: "\x1b[31m",
+  gris: "\x1b[90m",
+  brillante: "\x1b[1m"
+};
+
+function color(texto, ...colores) {
+  return `${colores.join("")}${texto}${coloresConsola.reset}`;
+}
+
 async function iniciarMenuConsola() {
   const readline = require("readline");
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const sistema = crearSistema();
   const preguntar = (texto) => new Promise((resolve) => rl.question(texto, resolve));
+  const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function escribirAnimado(texto, velocidad = 25, ...colores) {
+    for (const caracter of texto) {
+      process.stdout.write(colores.length ? color(caracter, ...colores) : caracter);
+      await esperar(velocidad);
+    }
+    process.stdout.write("\n");
+  }
+
+  function borrarLinea() {
+    process.stdout.write("\r\x1b[2K");
+  }
+
+  function centrar(texto, ancho) {
+    const espacio = Math.max(0, ancho - texto.length);
+    const izquierda = Math.floor(espacio / 2);
+    const derecha = espacio - izquierda;
+    return `${" ".repeat(izquierda)}${texto}${" ".repeat(derecha)}`;
+  }
+
+  async function mostrarMarco(lineas, colorMarco = coloresConsola.verde) {
+    const ancho = 54;
+    console.log(color(`+${"-".repeat(ancho)}+`, colorMarco));
+    for (const linea of lineas) {
+      await escribirAnimado(`|${centrar(linea, ancho)}|`, 3, coloresConsola.brillante, colorMarco);
+    }
+    console.log(color(`+${"-".repeat(ancho)}+`, colorMarco));
+  }
+
+  async function mostrarEscaneo(texto) {
+    const bloques = ["[=     ]", "[==    ]", "[===   ]", "[ ==== ]", "[  === ]", "[   == ]", "[    =]"];
+    for (let i = 0; i < bloques.length; i++) {
+      borrarLinea();
+      process.stdout.write(`${color(bloques[i], coloresConsola.cyan)} ${texto}`);
+      await esperar(70);
+    }
+    borrarLinea();
+  }
+
+  async function mostrarBarrido(texto) {
+    const ancho = 42;
+    for (let i = 0; i <= ancho; i++) {
+      const izquierda = ".".repeat(i);
+      const derecha = ".".repeat(ancho - i);
+      borrarLinea();
+      process.stdout.write(`${color(izquierda, coloresConsola.gris)}${color(">", coloresConsola.cyan)}${color(derecha, coloresConsola.gris)} ${texto}`);
+      await esperar(18);
+    }
+    borrarLinea();
+  }
+
+  async function mostrarLineaEstado(texto, detalle) {
+    await mostrarEscaneo(texto);
+    process.stdout.write(`${color("OK", coloresConsola.verde)} ${texto.padEnd(22)} ${color(detalle, coloresConsola.brillante)}\n`);
+  }
+
+  async function mostrarBarraProgreso(texto) {
+    const ancho = 28;
+    for (let progreso = 0; progreso <= ancho; progreso++) {
+      const lleno = "#".repeat(progreso);
+      const vacio = "-".repeat(ancho - progreso);
+      const porcentaje = String(Math.round((progreso / ancho) * 100)).padStart(3, " ");
+      borrarLinea();
+      process.stdout.write(`${texto} ${color(`[${lleno}${vacio}]`, coloresConsola.verde)} ${porcentaje}%`);
+      await esperar(35);
+    }
+    process.stdout.write("\n\n");
+  }
+
+  async function mostrarPulsoFinal() {
+    const texto = "CONSOLA LISTA";
+    for (let i = 0; i < 4; i++) {
+      borrarLinea();
+      process.stdout.write(color(`>> ${texto} <<`, coloresConsola.brillante, coloresConsola.verde));
+      await esperar(130);
+      borrarLinea();
+      process.stdout.write(color(`   ${texto}   `, coloresConsola.gris));
+      await esperar(100);
+    }
+    borrarLinea();
+    process.stdout.write(color(`>> ${texto} <<\n\n`, coloresConsola.brillante, coloresConsola.verde));
+  }
+
+  async function mostrarTarjetasResumen(productos, stockTotal) {
+    const bajoStock = sistema.reporteStock().filter((producto) => producto.bajoStock).length;
+    const filas = [
+      ["Productos", String(productos.length), "Stock", `${stockTotal} kg`],
+      ["Alertas", String(bajoStock), "Moneda", "ARS"]
+    ];
+
+    console.log(color("+----------------------+----------------------+", coloresConsola.gris));
+    for (const [tituloA, valorA, tituloB, valorB] of filas) {
+      const izquierda = `${tituloA}: ${valorA}`.padEnd(20);
+      const derecha = `${tituloB}: ${valorB}`.padEnd(20);
+      console.log(`${color("|", coloresConsola.gris)} ${color(izquierda, coloresConsola.brillante)} ${color("|", coloresConsola.gris)} ${color(derecha, coloresConsola.brillante)} ${color("|", coloresConsola.gris)}`);
+    }
+    console.log(color("+----------------------+----------------------+", coloresConsola.gris));
+    process.stdout.write("\n");
+    await esperar(180);
+  }
+
+  async function mostrarBienvenida() {
+    const productos = sistema.listarProductos();
+    const stockTotal = productos.reduce((suma, producto) => suma + producto.stock, 0);
+
+    try {
+      process.stdout.write("\x1b[?25l");
+      console.clear();
+      await mostrarMarco([
+        "SISTEMA DE GESTION DE MERCADO",
+        "FRUTAS | VERDURAS | STOCK | REPORTES"
+      ]);
+      process.stdout.write("\n");
+      await mostrarBarrido("leyendo inventario");
+      await mostrarTarjetasResumen(productos, stockTotal);
+      await mostrarLineaEstado("Cargando productos", "inventario base");
+      await mostrarLineaEstado("Activando ventas", "modulo online");
+      await mostrarLineaEstado("Activando compras", "proveedores listos");
+      await mostrarLineaEstado("Preparando reportes", "tablas y totales");
+      await mostrarBarraProgreso("Inicializando");
+      await mostrarPulsoFinal();
+    } finally {
+      process.stdout.write("\x1b[?25h");
+    }
+  }
+
+  async function mostrarMenu(animado = false) {
+    const lineas = [
+      "",
+      color("Sistema de Gestion de Frutas y Verduras", coloresConsola.brillante, coloresConsola.verde),
+      "1. Registrar venta",
+      "2. Registrar compra",
+      "3. Consultar stock",
+      "4. Crear producto",
+      "5. Generar reportes",
+      "6. Actualizar estado de producto",
+      "7. Eliminar producto",
+      "0. Salir",
+      ""
+    ];
+
+    if (!animado) {
+      console.log(lineas.join("\n"));
+      return;
+    }
+
+    for (const linea of lineas) {
+      console.log(linea);
+      await esperar(35);
+    }
+  }
 
   function mostrarProductos() {
     console.table(sistema.reporteStock().map((producto) => ({
@@ -224,19 +392,13 @@ async function iniciarMenuConsola() {
     }
   }
 
+  await mostrarBienvenida();
+
   let salir = false;
+  let primerMenu = true;
   while (!salir) {
-    console.log(`
-Sistema de Gestion de Frutas y Verduras
-1. Registrar venta
-2. Registrar compra
-3. Consultar stock
-4. Crear producto
-5. Generar reportes
-6. Actualizar estado de producto
-7. Eliminar producto
-0. Salir
-`);
+    await mostrarMenu(primerMenu);
+    primerMenu = false;
     const opcion = await preguntar("Elegir opcion: ");
     salir = opcion === "0";
     if (!salir) await ejecutarOpcion(opcion);
@@ -253,4 +415,3 @@ if (typeof window !== "undefined") {
   window.crearSistema = crearSistema;
   window.formatoMoneda = formatoMoneda;
 }
-// 

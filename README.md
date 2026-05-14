@@ -18,6 +18,7 @@ Para usar el sistema desde consola:
 node app.js
 ```
 
+<<<<<<< HEAD
 Para usar la interfaz web, abrir `index.html` en el navegador.
 
 ## Lista de frutas y verduras incluidas
@@ -31,3 +32,8 @@ Para usar la interfaz web, abrir `index.html` en el navegador.
 - Naranja
 - Banana
 - Piña
+=======
+Para usar la interfaz web, abrir `index.html` en el navegador
+o
+https://santiiiii1.github.io/SistemaDeGestion_/
+>>>>>>> b674dccdb20e23f776b5c7614ec922475d2d77d3
