@@ -31,3 +31,6 @@ Para usar la interfaz web, abrir `index.html` en el navegador.
 - Naranja
 - Banana
 - Piña
+Para usar la interfaz web, abrir `index.html` en el navegador
+o
+https://santiiiii1.github.io/SistemaDeGestion_/
