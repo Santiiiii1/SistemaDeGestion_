@@ -415,3 +415,4 @@ if (typeof window !== "undefined") {
   window.crearSistema = crearSistema;
   window.formatoMoneda = formatoMoneda;
 }
+
